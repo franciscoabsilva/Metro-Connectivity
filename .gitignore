@@ -1,3 +1,5 @@
-a.out
-run_app.sh
+*.out
 *.txt
+*.pdf
+gera.cpp
+run_app.sh
