@@ -6,7 +6,7 @@ using namespace std;
 
 struct Node {
     int id;
-    int seen = 0;
+    bool seen = false;
     int distance = -1;
     vector<Node*> neighbors;
 
@@ -20,6 +20,7 @@ struct Node {
         neighbors.push_back(neighbor);
     }
 };
+
 
 Node* getNode(unordered_map<int, Node*>& graph, int id) {
     if (graph.find(id) == graph.end()) {
@@ -54,15 +55,7 @@ int main() {
     }
 
     unordered_map<int, Node*> graph;
-    readInput(connections, lines, graph);
-    // print graph
-    cout << "Graph:\n";
-    for (auto it = graph.begin(); it != graph.end(); it++) {
-        cout << it->first << ": ";
-        for (Node* n : it->second->neighbors) {
-            cout << n->id << " ";
-        }
-        cout << "\n";
-    }
+    readInput(stations, lines, graph);
+    
     return 0;
 }
