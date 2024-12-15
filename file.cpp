@@ -43,6 +43,35 @@ void readInput(int stations, int lines, unordered_map<int, Node*>& graph) {
     }
 }
 
+int calculateDistance(unordered_map<int, Node*>& graph, int numNodes) {
+    vector<Node*> queue;
+    Node* start = graph[1];
+    start->distance = 0;
+    queue.push_back(start);
+    int maxDistance = 0;
+    int seen = 0;
+    while (!queue.empty()) {
+        Node* current = queue.front();
+        current->seen = true;
+        queue.erase(queue.begin());
+        seen++;
+        for (Node* neighbor : current->neighbors) {
+            if (neighbor->seen) {
+                continue;
+            }
+            if (neighbor->distance == -1 || neighbor->distance > current->distance + 1) {
+                neighbor->distance = current->distance + 1;
+                queue.push_back(neighbor);
+                maxDistance = max(maxDistance, neighbor->distance);
+            }
+        }
+    }
+    if(seen < numNodes) {
+        return -1;
+    }
+    return(maxDistance / 2 - 1);
+}
+
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
@@ -53,9 +82,13 @@ int main() {
         cout << "-1\n";
         return 0;
     }
-
+    if(lines <= 1) {
+        cout << "0\n";
+        return 0;
+    }
+    int numNodes = stations + lines;
     unordered_map<int, Node*> graph;
     readInput(stations, lines, graph);
-    
+    cout << calculateDistance(graph, numNodes) << "\n";
     return 0;
 }
