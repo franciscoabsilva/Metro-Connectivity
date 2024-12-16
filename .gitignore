@@ -3,4 +3,5 @@
 *.pdf
 gera.cpp
 run_app.sh
+.vscode/settings.json
  
