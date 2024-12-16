@@ -16,6 +16,10 @@ struct Node {
     void addNeighbor(Node* neighbor) {
         neighbors.insert(neighbor);
     }
+    void resetNode() {
+        seen = false;
+        distance = -1;
+    }
 };
 
 
@@ -26,25 +30,49 @@ Node* getNode(unordered_map<int, Node*>& graph, int id) {
     return graph[id];
 }
 
-void readInput(int stations, int lines, unordered_map<int, Node*>& graph) {
+void readInput(vector<unordered_set<int>>& stationsGraph, vector<int>& lineFrequency) {
     int id1, id2, idLine;
-    
     while (cin >> id1 >> id2 >> idLine) {
-        Node* station1 = getNode(graph, id1);
-        Node* station2 = getNode(graph, id2);
-        Node* line = getNode(graph, stations + idLine);
-        station1->addNeighbor(line);
-        station2->addNeighbor(line);
-        line->addNeighbor(station1);
-        line->addNeighbor(station2);        
+        // O QUE FAZER SE ID1 OU ID 2 FOR MAIOR QUE STATIONS COUNT ?? TODO
+        if (stationsGraph[id1].find(idLine) == stationsGraph[id1].end()) {
+            lineFrequency[idLine]++;
+        }
+        if (stationsGraph[id2].find(idLine) == stationsGraph[id2].end()) {
+            lineFrequency[idLine]++;
+        }
+        stationsGraph[id1].insert(idLine);
+        stationsGraph[id2].insert(idLine);
     }
 }
 
-int calculateDistance(unordered_map<int, Node*>& graph, int numNodes) {
+int buildLinesGraph(vector<unordered_set<int>>& stationsGraph, unordered_map<int, Node*>& linesGraph, int stationsCount) {
+    for (int station = 1; station <= stationsCount; station++) {
+        
+        // If there is a station with no connections
+        if (stationsGraph[station].empty()) {
+            return 1;
+        }
+        if (stationsGraph[station].size() > 1) {
+            for (int currentLine : stationsGraph[station]) {
+                Node* lineNode = getNode(linesGraph, currentLine);
+                for (int connectedLine : stationsGraph[station]) {
+                    if (connectedLine != currentLine) {
+                        Node* neighborNode = getNode(linesGraph, connectedLine);
+                        lineNode->addNeighbor(neighborNode);
+                        // NAO VALE APENA ADD O VIZINHO PQ ELE EVENTUALMENTE CHEGA LÁ
+                        // ISTO É SO PRA MARTA VER, APAGAR TODO
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+int calculateDistance(unordered_map<int, Node*>& linesGraph, Node* startLine, int linesCount) {
     queue<Node*> queue;
-    Node* start = graph[1];
-    start->distance = 0;
-    queue.push(start);
+    startLine->distance = 0;
+    queue.push(startLine);
     int maxDistance = 0;
     int seen = 0;
     while (!queue.empty()) {
@@ -62,42 +90,85 @@ int calculateDistance(unordered_map<int, Node*>& graph, int numNodes) {
             }
         }
     }
-    if(seen < numNodes) {
+
+    // If there are lines that are not connected
+    if (seen < linesCount) {
         return -1;
     }
-    for (auto& pair : graph) {
+    for (pair<const int, Node*>& pair : linesGraph) {
         Node* node = pair.second;
         if (node->distance > maxDistance) {
             maxDistance = node->distance;
         }
     }
-        for (const auto& pair : graph) {
-        Node* node = pair.second;
-        cout << "Node " << node->id << " has distance " << node->distance << endl;
-    }
-    cout << "Max distance: " << maxDistance << endl;
-    return((maxDistance + 1) / 2 - 1);
+    return maxDistance;
 }
+
 
 int main() {
     ios::sync_with_stdio(0);
     cin.tie(0);
 
-    int stations, connections, lines;
-    cin >> stations >> connections >> lines;
-    if (connections < stations - 1) {
+    int stationsCount, connectionsCount, linesCount;
+    cin >> stationsCount >> connectionsCount >> linesCount;
+
+    // If there are not enough connections
+    if (stationsCount > connectionsCount + 1) {
         cout << "-1\n";
         return 0;
     }
-    if(lines <= 1) {
+
+    // If there is only one line
+    if(linesCount <= 1) {
         cout << "0\n";
         return 0;
     }
-    int numNodes = stations + lines;
-    unordered_map<int, Node*> graph;
-    readInput(stations, lines, graph);
-    cout << calculateDistance(graph, numNodes) << "\n";
+    
+    vector<unordered_set<int>> stationsGraph(stationsCount + 1);
+    vector<int> lineFrequency(linesCount + 1, 0);
+    readInput(stationsGraph, lineFrequency);
 
+    for (int i = 1; i <= linesCount; i++) {
+        // If there is a line that connects all stations
+        if (lineFrequency[i] == stationsCount) {
+            cout << "0\n";
+            return 0;
+        }
+        // PENSEI NESTE CASO, NAO SEI SE QUERO RETORNAR 0 OU -1 OU
+        // SE É SEQUER POSSIVEL, SE FOR 0 POSSO METER NA CONDIÇÃO DE CIMA
+        // TODO
+        /*if (lineFrequency[i] == 0) {
+            cout << "0\n";
+            return 0;
+        }*/
+    }
+    
+
+    unordered_map<int, Node*> linesGraph;
+    if (buildLinesGraph(stationsGraph, linesGraph, stationsCount)) {
+        cout << "-1\n";
+        return 0;
+    }
+
+    int maxDistance = 0;
+    for (int startLine = 1; startLine <= linesCount; startLine++) {
+        int distance = calculateDistance(linesGraph, linesGraph[startLine], linesCount);
+        
+        if (distance == -1) {
+            cout << "-1\n";
+            return 0;
+        }
+        maxDistance = max(maxDistance, distance);
+        if (maxDistance == linesCount-1) {
+            break;
+        }
+        for (pair<const int, Node*>& pair : linesGraph) {
+            Node* node = pair.second;
+            node->resetNode();
+        }
+    }
+    
+    cout << maxDistance << "\n";
 
     return 0;
 }
