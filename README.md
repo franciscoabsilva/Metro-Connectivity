@@ -8,7 +8,7 @@ This project focuses on developing an algorithm to analyze the connectivity of a
 The input file should be a `.txt` file that contain the following:
 
 - The first line contains three integers `stationsCount`, `connectionsCount` and `linesCount`, representing the number of stations, connections and metro lines.
-- The other lines contain each three integers: `id1` and `id2` are the indices of two stations and `idLine` is the index of the line connecting the two stations `x` and `y`.
+- The other lines contain each three integers: `id1` and `id2` are the indices of two stations and `idLine` is the index of the line connecting the two stations `id1` and `id2`.
   
 The output will be printed to stdout and will contain the follow:
 
