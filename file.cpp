@@ -33,7 +33,6 @@ Node* getNode(unordered_map<int, Node*>& graph, int id) {
 void readInput(vector<unordered_set<int>>& stationsGraph, vector<int>& lineFrequency) {
     int id1, id2, idLine;
     while (cin >> id1 >> id2 >> idLine) {
-        // O QUE FAZER SE ID1 OU ID 2 FOR MAIOR QUE STATIONS COUNT ?? TODO
         if (stationsGraph[id1].find(idLine) == stationsGraph[id1].end()) {
             lineFrequency[idLine]++;
         }
@@ -59,8 +58,6 @@ int buildLinesGraph(vector<unordered_set<int>>& stationsGraph, unordered_map<int
                     if (connectedLine != currentLine) {
                         Node* neighborNode = getNode(linesGraph, connectedLine);
                         lineNode->addNeighbor(neighborNode);
-                        // NAO VALE APENA ADD O VIZINHO PQ ELE EVENTUALMENTE CHEGA LÁ
-                        // ISTO É SO PRA MARTA VER, APAGAR TODO
                     }
                 }
             }
@@ -100,6 +97,7 @@ int calculateDistance(unordered_map<int, Node*>& linesGraph, Node* startLine, in
         if (node->distance > maxDistance) {
             maxDistance = node->distance;
         }
+        node->resetNode();
     }
     return maxDistance;
 }
@@ -134,13 +132,6 @@ int main() {
             cout << "0\n";
             return 0;
         }
-        // PENSEI NESTE CASO, NAO SEI SE QUERO RETORNAR 0 OU -1 OU
-        // SE É SEQUER POSSIVEL, SE FOR 0 POSSO METER NA CONDIÇÃO DE CIMA
-        // TODO
-        /*if (lineFrequency[i] == 0) {
-            cout << "0\n";
-            return 0;
-        }*/
     }
     
 
@@ -161,10 +152,6 @@ int main() {
         maxDistance = max(maxDistance, distance);
         if (maxDistance == linesCount-1) {
             break;
-        }
-        for (pair<const int, Node*>& pair : linesGraph) {
-            Node* node = pair.second;
-            node->resetNode();
         }
     }
     
